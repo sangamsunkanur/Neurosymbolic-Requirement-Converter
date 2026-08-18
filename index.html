@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>WAVE - NeuroSymbolic Requirement Converter</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="header">
+
+        <img
+            src="{{ url_for('static', filename='images/wave_logo.png') }}"
+            alt="WAVE Logo"
+            class="logo">
+
+        <div>
+
+            <h1>WAVE</h1>
+
+            <p class="subtitle">
+                NeuroSymbolic Requirement Converter
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- ================ PIPELINE ================= -->
+
+    <div class="pipeline">
+
+{% if conversion_mode == "forward" %}
+
+    <div class="step">
+        <span></span>
+        <p>Natural Language</p>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="step">
+        <span></span>
+        <p>Controlled NL</p>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="step">
+        <span></span>
+        <p>Temporal Logic</p>
+    </div>
+
+{% else %}
+
+    <div class="step">
+        <span></span>
+        <p>Temporal Logic</p>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="step">
+        <span></span>
+        <p>Controlled NL</p>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="step">
+        <span></span>
+        <p>English</p>
+    </div>
+
+{% endif %}
+
+</div>
+
+    <!-- ================= FORM ================= -->
+
+    <form method="POST" id="converterForm">
+
+        <div class="mode-selector">
+
+            <label>
+
+                <input
+                    type="radio"
+                    name="conversion_mode"
+                    value="forward"
+                    {% if conversion_mode == "forward" %}checked{% endif %}>
+
+                Natural Language → Temporal Logic
+
+            </label>
+
+            &nbsp;&nbsp;&nbsp;&nbsp;
+
+            <label>
+
+                <input
+                    type="radio"
+                    name="conversion_mode"
+                    value="reverse"
+                    {% if conversion_mode == "reverse" %}checked{% endif %}>
+
+                Temporal Logic → Natural Language
+
+            </label>
+
+        </div>
+
+        <br>
+
+        <textarea
+            id="inputText"
+            name="requirement"
+            placeholder="{% if conversion_mode == 'reverse' %}Enter a temporal logic formula...{% else %}Enter a natural language requirement...{% endif %}"
+            required></textarea>
+
+        <br>
+
+        <button
+            type="submit"
+            id="convertBtn">
+
+            Convert
+
+        </button>
+
+    </form>
+
+    <!-- Loading Spinner -->
+
+    <div id="loading" style="display:none;">
+
+        <div class="spinner"></div>
+
+        <p>Converting requirement...</p>
+
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+
+    {% if result %}
+
+    <div class="results">
+
+        <!-- ================= FORWARD PIPELINE ================= -->
+
+        {% if conversion_mode == "forward" %}
+
+            {% if result.success %}
+
+                <div class="card">
+
+                    <h3>Natural Language</h3>
+
+                    <p>{{ result.input }}</p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Controlled Natural Language</h3>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyText('cnl', this)">
+
+                        Copy
+
+                    </button>
+
+                    <p id="cnl">
+
+                        {{ result.cnl }}
+
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>{{ result.logic_type }}</h3>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyText('logic', this)">
+
+                        Copy
+
+                    </button>
+
+                    <pre id="logic" class="logic">
+
+{{ result.temporal_logic }}
+
+                    </pre>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Semantic Confidence Indicator</h3>
+
+                    <p>
+
+                        {{ result.semantics.confidence }}
+
+                    </p>
+
+                </div>
+
+            {% else %}
+
+                <div class="card error-card">
+
+                    <h3>❌ Conversion Failed</h3>
+
+                    <p><strong>Stage:</strong> {{ result.stage }}</p>
+
+                    <p><strong>Error:</strong> {{ result.error }}</p>
+
+                    {% if result.validation %}
+
+                        <p><strong>Status:</strong> {{ result.validation.status }}</p>
+
+                        <p><strong>Reason:</strong> {{ result.validation.reason }}</p>
+
+                        <p><strong>Suggestion:</strong> {{ result.validation.suggestion }}</p>
+
+                    {% endif %}
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+        <!-- ================= REVERSE PIPELINE ================= -->
+
+        {% if conversion_mode == "reverse" %}
+
+            {% if result.status == "SUCCESS" %}
+
+                <div class="card">
+
+                    <h3>Temporal Logic</h3>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyText('reverse_logic', this)">
+
+                        Copy
+
+                    </button>
+
+                    <pre id="reverse_logic" class="logic">
+
+{{ result.input_ltl }}
+
+                    </pre>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Controlled Natural Language</h3>
+
+                    <button
+                        class="copy-btn"
+                        onclick="copyText('reverse_cnl', this)">
+
+                        Copy
+
+                    </button>
+
+                    <p id="reverse_cnl">
+
+                        {{ result.controlled_natural_language }}
+
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Regenerated English</h3>
+
+                    <p>
+
+                        {{ result.english }}
+
+                    </p>
+
+                </div>
+
+                
+
+            {% else %}
+
+                <div class="card error-card">
+
+                    <h3>❌ Conversion Failed</h3>
+
+                    <p>
+
+                        {{ result.error }}
+
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+const radios = document.querySelectorAll(
+'input[name="conversion_mode"]');
+
+const textarea = document.getElementById("inputText");
+
+radios.forEach(radio => {
+
+    radio.addEventListener("change", function(){
+
+        if(this.value==="forward"){
+
+            textarea.placeholder =
+            "Enter a natural language requirement...";
+
+        }
+
+        else{
+
+            textarea.placeholder =
+            "Enter a temporal logic formula...";
+
+        }
+
+        textarea.value = "";
+
+        const results = document.querySelector(".results");
+
+        if(results){
+
+            results.remove();
+
+        }
+
+    });
+
+});
+
+</script>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>
