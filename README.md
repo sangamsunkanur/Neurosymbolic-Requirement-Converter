@@ -114,7 +114,7 @@ Contains the conversion functionality used by the Flask application, including t
 Contains the final research/prototype implementation developed during the project, including semantic analysis, AST processing, deterministic generation, and reverse conversion.
 
 **`templates/index.html`**  
-Provides the main WAVE web interface.
+Provides the main web interface.
 
 **`static/style.css`**  
 Contains the styling for the web interface.
@@ -127,8 +127,8 @@ Contains client-side interface functionality.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/WAVE-NeuroSymbolic-Requirement-Converter.git
-cd WAVE-NeuroSymbolic-Requirement-Converter
+git clone https://github.com/YOUR-USERNAME/NeuroSymbolic-Requirement-Converter.git
+cd NeuroSymbolic-Requirement-Converter
 
 python -m venv venv
 
@@ -151,6 +151,9 @@ Set the `OPENAI_API_KEY` environment variable before running the application.
 $env:OPENAI_API_KEY="your_api_key_here"
 ```
 
+### Windows Command Prompt
+
+```cmd
 set OPENAI_API_KEY=your_api_key_here
 ```
 
@@ -158,7 +161,8 @@ set OPENAI_API_KEY=your_api_key_here
 
 After installing the dependencies and configuring the OpenAI API key, run:
 
-```bash
+bash
+```
 python app.py
 ```
 
